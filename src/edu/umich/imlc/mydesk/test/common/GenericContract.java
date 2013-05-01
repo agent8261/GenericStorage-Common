@@ -30,6 +30,8 @@ public final class GenericContract
       "edu.umich.imlc.mydesk.test.service",
       "edu.umich.imlc.mydesk.test.auth.LoginActivty");
 
+  public static final String KEY_CHOOSE_ACCOUNT = "chooseNewAccount";
+  
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
 
