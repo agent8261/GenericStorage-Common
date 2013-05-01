@@ -52,7 +52,7 @@ public final class GenericContract
 
     private Tables()
     {
-
+      Utils.printMethodName();
     }
   }// Tables
 
@@ -76,7 +76,7 @@ public final class GenericContract
     // -------------------------------------------------------------------------
     private MetaDataColumns()
     {
-
+      Utils.printMethodName();
     }
   }// MetaDataColumns
 
@@ -109,7 +109,7 @@ public final class GenericContract
     // -------------------------------------------------------------------------
     private LocalConflictColumns()
     {
-
+      Utils.printMethodName();
     }
   }// LocalConflictColumns
 
@@ -128,6 +128,7 @@ public final class GenericContract
     // -------------------------------------------------------------------------
     public MetaData(Cursor c)
     {
+      Utils.printMethodName();
       fileId = c.getString(0);
       fileName = c.getString(1);
       fileType = c.getString(2);
