@@ -3,27 +3,27 @@ package edu.umich.imlc.mydesk.test.common.exceptions;
 import edu.umich.imlc.mydesk.test.common.Utils;
 
 @SuppressWarnings("serial")
-public class NotOwnerException extends MyDeskException
+public class FileLockedException extends MyDeskException
 {
-  public static final String TAG = "NotOwnerException";
-  public NotOwnerException()
+  public static final String TAG = "FileLockedException";
+  public FileLockedException()
   {
     Utils.printMethodName(TAG);
   }
 
-  public NotOwnerException(String detailMessage)
+  public FileLockedException(String detailMessage)
   {
     super(detailMessage);
     Utils.printMethodName(TAG);
   }
 
-  public NotOwnerException(Throwable throwable)
+  public FileLockedException(Throwable throwable)
   {
     super(throwable);
     Utils.printMethodName(TAG);
   }
 
-  public NotOwnerException(String detailMessage, Throwable throwable)
+  public FileLockedException(String detailMessage, Throwable throwable)
   {
     super(detailMessage, throwable);
     Utils.printMethodName(TAG);
