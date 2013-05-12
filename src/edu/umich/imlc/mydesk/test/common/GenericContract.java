@@ -1,5 +1,9 @@
 package edu.umich.imlc.mydesk.test.common;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import edu.umich.imlc.mydesk.test.common.exceptions.FileLockedException;
 import edu.umich.imlc.mydesk.test.common.exceptions.MyDeskException;
 import edu.umich.imlc.mydesk.test.common.exceptions.FileConflictException;
@@ -13,15 +17,11 @@ public final class GenericContract
 {
   public static final String TAG = "GenericContract";
   public static final String AUTHORITY = "edu.umich.imlc.mydesk.test.service.provider";
-  public static final Uri URI_BASE = Uri.parse("content://" + AUTHORITY);
-  public static final Uri URI_FILES = Uri.withAppendedPath(URI_BASE,
-      Uri.encode("files"));
-  public static final Uri URI_CURRENT_ACCOUNT = Uri.withAppendedPath(URI_BASE,
-      Uri.encode("current_account"));
   public static final String KEY_FILE_NAME = "fileName";
   public static final String KEY_NEW_FILE = "newFile";
   public static final String KEY_UPDATE_SOURCE = "updateSource";
   public static final String KEY_UPDATE_OLD_SEQUENCE = "update_old_sequence";
+  public static final String KEY_CHOOSE_ACCOUNT = "chooseNewAccount";
   public static final String SHARED_PREFS = "sharedPrefs";
   public static final String PREFS_ACCOUNT_NAME = "accountName";
   public static final String CALLER_IS_SYNC_ADAPTER = "caller_is_sync_adapter";
@@ -30,8 +30,9 @@ public final class GenericContract
   public static final ComponentName COMPONENT_LOGIN_ACTIVITY = new ComponentName(
       "edu.umich.imlc.mydesk.test.service",
       "edu.umich.imlc.mydesk.test.auth.LoginActivty");
+  public static final SimpleDateFormat INTERNAL_DATE_FORMAT = new SimpleDateFormat(
+      "yyyy-MM-dd HH:mm:ss.SSSZ", Locale.US);
 
-  public static final String KEY_CHOOSE_ACCOUNT = "chooseNewAccount";
 
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
@@ -41,7 +42,34 @@ public final class GenericContract
   }
 
   /**
-   * @author Adrian Tables available in GenericProvider
+   * URIs used in GenericProvider
+   * 
+   * @author Adrian
+   * 
+   */
+  public static final class GenericURIs
+  {
+    public static final Uri URI_BASE = Uri.parse("content://"
+        + GenericContract.AUTHORITY);
+    public static final Uri URI_FILES = Uri.withAppendedPath(URI_BASE,
+        Uri.encode("files"));
+    public static final Uri URI_CURRENT_ACCOUNT = Uri.withAppendedPath(
+        URI_BASE, Uri.encode("current_account"));
+    public static final Uri URI_LOCAL_CONFLICTS = Uri.withAppendedPath(
+        URI_BASE, Uri.encode("local_conflicts"));
+    public static final Uri URI_BACKEND_CONFLICTS = Uri.withAppendedPath(
+        URI_BASE, Uri.encode("backend_conflicts"));
+
+    private GenericURIs()
+    {
+
+    }
+  }
+
+  /**
+   * Tables available in GenericProvider
+   * 
+   * @author Adrian
    */
   public static final class Tables
   {
@@ -102,6 +130,7 @@ public final class GenericContract
   {
     public static final String ID = "_id";
     public static final String FILE_ID = "file_id";
+    public static final String FILE_OWNER = "file_owner";
     public static final String NEWFILE_URI = "new_file_uri";
     public static final String NEWFILE_TIMESTAMP = "new_file_timestamp";
     public static final String RESOLVED = "resolved";
@@ -117,6 +146,9 @@ public final class GenericContract
   {
     public static final String ID = "_id";
     public static final String FILE_ID = "file_id";
+    public static final String FILE_OWNER = "file_owner";
+    public static final String BACKEND_SEQUENCE = "backend_sequence";
+    public static final String BACKEND_TIMESTAMP = "backend_timestamp";
     public static final String RESOLVED = "resolved";
 
     private BackendConflictColumns()
@@ -124,6 +156,65 @@ public final class GenericContract
 
     }
   }// BackendConflictColumns
+
+  public static final class BackendConflictInfo
+  {
+    private final long id;
+    private final String fileId;
+    private final String fileOwner;
+    private final long backendSequence;
+    private final Date backendTimeStamp;
+
+    public BackendConflictInfo(long id_, String fileId_, String fileOwner_,
+        long backendSequence_, Date backendTimeStamp_)
+    {
+      id = id_;
+      fileId = fileId_;
+      fileOwner = fileOwner_;
+      backendSequence = backendSequence_;
+      backendTimeStamp = backendTimeStamp_;
+    }
+
+    /**
+     * @return the id
+     */
+    public long id()
+    {
+      return id;
+    }
+
+    /**
+     * @return the fileId
+     */
+    public String fileId()
+    {
+      return fileId;
+    }
+
+    /**
+     * @return the fileOwner
+     */
+    public String fileOwner()
+    {
+      return fileOwner;
+    }
+
+    /**
+     * @return the backendSequence
+     */
+    public long backendSequence()
+    {
+      return backendSequence;
+    }
+
+    /**
+     * @return the backendTimeStamp
+     */
+    public Date backendTimeStamp()
+    {
+      return backendTimeStamp;
+    }
+  }
 
   public static final class MetaData
   {
@@ -231,9 +322,10 @@ public final class GenericContract
     public String toString()
     {
       Utils.printMethodName(TAG);
-      return "\n{\n  FileId: " + fileId + "\n  FileName: " + fileName + "\n  FileType:" + fileType
-          + "\n  FileUri:" + fileUri + "\n  Seq:" + sequenceNumber + "\n  Dirty:" + dirty + "\n  Conflict:"
-          + conflict + "\n}\n";
+      return "\n{\n  FileId: " + fileId + "\n  FileName: " + fileName
+          + "\n  FileType:" + fileType + "\n  FileUri:" + fileUri + "\n  Seq:"
+          + sequenceNumber + "\n  Dirty:" + dirty + "\n  Conflict:" + conflict
+          + "\n}\n";
     }
 
   }// MetaData
