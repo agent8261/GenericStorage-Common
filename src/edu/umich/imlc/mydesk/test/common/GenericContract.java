@@ -1,5 +1,6 @@
 package edu.umich.imlc.mydesk.test.common;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -86,7 +87,9 @@ public final class GenericContract
   }// Tables
 
   /**
-   * @author Adrian Columns of the MetaData table
+   * Columns of the MetaData table
+   * 
+   * @author Adrian
    */
   public static final class MetaDataColumns
   {
@@ -102,6 +105,11 @@ public final class GenericContract
     public static final String LOCKED = "locked";
     public static final String CONFLICT = "conflict";
 
+    public static final String[] METADATA_PROJ = { MetaDataColumns.FILE_ID,
+        MetaDataColumns.NAME, MetaDataColumns.TYPE, MetaDataColumns.OWNER,
+        MetaDataColumns.URI, MetaDataColumns.SEQUENCE, MetaDataColumns.DIRTY,
+        MetaDataColumns.LOCKED, MetaDataColumns.CONFLICT };
+
     // -------------------------------------------------------------------------
     // -------------------------------------------------------------------------
     private MetaDataColumns()
@@ -110,30 +118,14 @@ public final class GenericContract
   }// MetaDataColumns
 
   /**
-   * @author Adrian Projections to use with the MetaData table
-   */
-  public static final class MetaDataProjections
-  {
-    public static final String[] METADATA = { MetaDataColumns.FILE_ID,
-        MetaDataColumns.NAME, MetaDataColumns.TYPE, MetaDataColumns.OWNER,
-        MetaDataColumns.URI, MetaDataColumns.SEQUENCE, MetaDataColumns.DIRTY,
-        MetaDataColumns.LOCKED, MetaDataColumns.CONFLICT };
-
-    // -------------------------------------------------------------------------
-    // -------------------------------------------------------------------------
-  }// MetaDataProjections
-
-  /**
    * @author Adrian Columns of the LocalConflicts table
    */
   public static final class LocalConflictColumns
   {
     public static final String ID = "_id";
     public static final String FILE_ID = "file_id";
-    public static final String FILE_OWNER = "file_owner";
     public static final String NEWFILE_URI = "new_file_uri";
     public static final String NEWFILE_TIMESTAMP = "new_file_timestamp";
-    public static final String RESOLVED = "resolved";
 
     // -------------------------------------------------------------------------
     // -------------------------------------------------------------------------
@@ -146,10 +138,12 @@ public final class GenericContract
   {
     public static final String ID = "_id";
     public static final String FILE_ID = "file_id";
-    public static final String FILE_OWNER = "file_owner";
     public static final String BACKEND_SEQUENCE = "backend_sequence";
     public static final String BACKEND_TIMESTAMP = "backend_timestamp";
     public static final String RESOLVED = "resolved";
+
+    public static final String[] BACKEND_CONFLICT_PROJ = { ID, FILE_ID,
+        BACKEND_SEQUENCE, BACKEND_TIMESTAMP, RESOLVED };
 
     private BackendConflictColumns()
     {
@@ -161,18 +155,27 @@ public final class GenericContract
   {
     private final long id;
     private final String fileId;
-    private final String fileOwner;
     private final long backendSequence;
     private final Date backendTimeStamp;
+    private final BackendResolve resolved;
 
-    public BackendConflictInfo(long id_, String fileId_, String fileOwner_,
-        long backendSequence_, Date backendTimeStamp_)
+    public BackendConflictInfo(Cursor c) throws ParseException
+    {
+      id = c.getLong(0);
+      fileId = c.getString(1);
+      backendSequence = c.getLong(2);
+      backendTimeStamp = INTERNAL_DATE_FORMAT.parse(c.getString(3));
+      resolved = BackendResolve.valueOf(c.getString(4));
+    }
+
+    public BackendConflictInfo(long id_, String fileId_, long backendSequence_,
+        Date backendTimeStamp_, BackendResolve resolved_)
     {
       id = id_;
       fileId = fileId_;
-      fileOwner = fileOwner_;
       backendSequence = backendSequence_;
       backendTimeStamp = backendTimeStamp_;
+      resolved = resolved_;
     }
 
     /**
@@ -192,14 +195,6 @@ public final class GenericContract
     }
 
     /**
-     * @return the fileOwner
-     */
-    public String fileOwner()
-    {
-      return fileOwner;
-    }
-
-    /**
      * @return the backendSequence
      */
     public long backendSequence()
@@ -213,6 +208,14 @@ public final class GenericContract
     public Date backendTimeStamp()
     {
       return backendTimeStamp;
+    }
+
+    /**
+     * @return the resolved
+     */
+    public BackendResolve resolved()
+    {
+      return resolved;
     }
   }
 
@@ -332,16 +335,9 @@ public final class GenericContract
 
   // ---------------------------------------------------------------------------
 
-  public static enum LocalResolve
-  {
-    NEW, EXISTING;
-  }// LocalResolve
-
-  // ---------------------------------------------------------------------------
-
   public static enum BackendResolve
   {
-    LOCAL, BACKEND;
+    UNRESOLVED, LOCAL, BACKEND;
   }// BackendResolve
 
   // ---------------------------------------------------------------------------
