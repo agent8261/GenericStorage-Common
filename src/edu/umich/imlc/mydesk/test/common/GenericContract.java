@@ -26,8 +26,9 @@ public final class GenericContract
   public static final String SHARED_PREFS = "sharedPrefs";
   public static final String PREFS_ACCOUNT_NAME = "accountName";
   public static final String CALLER_IS_SYNC_ADAPTER = "caller_is_sync_adapter";
-  public static final String UNLOCK_FILE = "clean_file";
-  public static final String LOCK_FILE = "lock_file";
+  public static final String UPDATE_METADATA = "update_metadata";
+  public static final String UNLOCK_FILES = "unlock_files";
+  public static final String LOCK_FILES = "lock_files";
   public static final ComponentName COMPONENT_LOGIN_ACTIVITY = new ComponentName(
       "edu.umich.imlc.mydesk.test.service",
       "edu.umich.imlc.mydesk.test.auth.LoginActivty");
@@ -105,10 +106,17 @@ public final class GenericContract
     public static final String LOCKED = "locked";
     public static final String CONFLICT = "conflict";
 
-    public static final String[] METADATA_PROJ = { MetaDataColumns.FILE_ID,
-        MetaDataColumns.NAME, MetaDataColumns.TYPE, MetaDataColumns.OWNER,
-        MetaDataColumns.URI, MetaDataColumns.SEQUENCE, MetaDataColumns.DIRTY,
-        MetaDataColumns.LOCKED, MetaDataColumns.CONFLICT };
+    public static final String[] METADATA_PROJ = {
+        Tables.METADATA + "." + MetaDataColumns.FILE_ID,
+        Tables.METADATA + "." + MetaDataColumns.NAME,
+        Tables.METADATA + "." + MetaDataColumns.TYPE,
+        Tables.METADATA + "." + MetaDataColumns.OWNER,
+        Tables.METADATA + "." + MetaDataColumns.URI,
+        Tables.METADATA + "." + MetaDataColumns.SEQUENCE,
+        Tables.METADATA + "." + MetaDataColumns.DIRTY,
+        Tables.METADATA + "." + MetaDataColumns.LOCKED,
+        Tables.METADATA + "." + MetaDataColumns.CONFLICT,
+        Tables.METADATA + "." + TIME };
 
     // -------------------------------------------------------------------------
     // -------------------------------------------------------------------------
@@ -122,8 +130,8 @@ public final class GenericContract
    */
   public static final class LocalConflictColumns
   {
-    public static final String ID = "_id";
-    public static final String FILE_ID = "file_id";
+    public static final String ID = MetaDataColumns.ID;
+    public static final String FILE_ID = MetaDataColumns.FILE_ID;
     public static final String NEWFILE_URI = "new_file_uri";
     public static final String NEWFILE_TIMESTAMP = "new_file_timestamp";
 
@@ -136,14 +144,18 @@ public final class GenericContract
 
   public static final class BackendConflictColumns
   {
-    public static final String ID = "_id";
-    public static final String FILE_ID = "file_id";
+    public static final String ID = MetaDataColumns.ID;
+    public static final String FILE_ID = MetaDataColumns.FILE_ID;
     public static final String BACKEND_SEQUENCE = "backend_sequence";
     public static final String BACKEND_TIMESTAMP = "backend_timestamp";
     public static final String RESOLVED = "resolved";
 
-    public static final String[] BACKEND_CONFLICT_PROJ = { ID, FILE_ID,
-        BACKEND_SEQUENCE, BACKEND_TIMESTAMP, RESOLVED };
+    public static final String[] BACKEND_CONFLICT_PROJ = {
+        Tables.BACKEND_CONFLICTS + "." + ID,
+        Tables.BACKEND_CONFLICTS + "." + FILE_ID,
+        Tables.BACKEND_CONFLICTS + "." + BACKEND_SEQUENCE,
+        Tables.BACKEND_CONFLICTS + "." + BACKEND_TIMESTAMP,
+        Tables.BACKEND_CONFLICTS + "." + RESOLVED };
 
     private BackendConflictColumns()
     {
@@ -231,6 +243,7 @@ public final class GenericContract
     private final boolean dirty;
     private final boolean locked;
     private final boolean conflict;
+    private final Date timestamp;
 
     // -------------------------------------------------------------------------
     // -------------------------------------------------------------------------
@@ -247,6 +260,16 @@ public final class GenericContract
       dirty = c.getInt(6) == 1;
       locked = c.getInt(7) == 1;
       conflict = c.getInt(8) == 1;
+      Date temp = null;
+      try
+      {
+        temp = INTERNAL_DATE_FORMAT.parse(c.getString(9));
+      }
+      catch( ParseException e )
+      {
+        e.printStackTrace();
+      }
+      timestamp = temp;
     }// ctor
 
     // -------------------------------------------------------------------------
@@ -317,6 +340,13 @@ public final class GenericContract
     public boolean conflict()
     {
       return conflict;
+    }
+
+    // -------------------------------------------------------------------------
+
+    public Date timestamp()
+    {
+      return timestamp;
     }
 
     // -------------------------------------------------------------------------
